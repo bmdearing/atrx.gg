@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>atrx.gg — work in progress</title>
+<meta name="description" content="atrx.gg is under construction.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#16141f;
+    --surface:#221e30;
+    --line:#332c47;
+    --text:#e9e5f2;
+    --muted:#8a83a3;
+    --accent:#f2a65a;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html,body{height:100%}
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:clamp(1.5rem,5vw,4rem);
+    overflow:hidden;
+  }
+
+  /* faint scanline wash, keeps the void from reading as flat black */
+  body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.018) 0 1px,
+      transparent 1px 3px
+    );
+  }
+
+  .mark{
+    font-size:.8rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .mark b{color:var(--accent);font-weight:500}
+
+  .stage{
+    display:flex;
+    flex-direction:column;
+    gap:1.75rem;
+    max-width:52rem;
+  }
+
+  h1{
+    font-family:"Bricolage Grotesque",system-ui,sans-serif;
+    font-weight:800;
+    font-size:clamp(2.6rem,11vw,7.5rem);
+    line-height:.92;
+    letter-spacing:-.03em;
+    text-wrap:balance;
+  }
+  h1 .dim{color:var(--muted)}
+
+  .meter{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .track{
+    flex:1;
+    height:6px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+
+  .fill{
+    height:100%;
+    width:0%;
+    background:var(--accent);
+    transition:width .45s cubic-bezier(.2,.8,.3,1);
+  }
+
+  .pct{
+    font-size:.85rem;
+    color:var(--accent);
+    font-variant-numeric:tabular-nums;
+    min-width:3.5ch;
+    text-align:right;
+  }
+
+  .tip{
+    font-size:.85rem;
+    line-height:1.6;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    padding-top:1rem;
+    display:flex;
+    gap:.75rem;
+    align-items:baseline;
+  }
+  .tip .label{
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:.7rem;
+    flex-shrink:0;
+  }
+  #tipText{transition:opacity .4s ease}
+
+  footer{
+    font-size:.75rem;
+    color:var(--muted);
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+  footer a:hover,footer a:focus-visible{color:var(--accent);border-color:var(--accent)}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  @media (prefers-reduced-motion:reduce){
+    .fill{transition:none}
+    #tipText{transition:none}
+  }
+</style>
+</head>
+<body>
+
+  <header class="mark">atrx<b>.gg</b></header>
+
+  <main class="stage">
+    <h1>Work in<br>progress<span class="dim">.</span></h1>
+
+    <div class="meter">
+      <div class="track" role="progressbar" aria-label="Site construction, indefinitely stalled" aria-valuetext="Not finished">
+        <div class="fill" id="fill"></div>
+      </div>
+      <span class="pct" id="pct" aria-hidden="true">0%</span>
+    </div>
+
+    <p class="tip">
+      <span class="label">Tip</span>
+      <span id="tipText">Nothing here yet. Check back later.</span>
+    </p>
+  </main>
+
+  <footer>
+    <span>Something is being built.</span>
+    <span id="year"></span>
+  </footer>
+
+<script>
+(function(){
+  var tips = [
+    "Nothing here yet. Check back later.",
+    "This bar is decorative. It will not finish.",
+    "The domain works. That was step one.",
+    "Bookmark it if you're feeling optimistic.",
+    "Diamonds are most common at Y = -59.",
+    "gg is short for good game. This is not a game.",
+    "Estimated completion: eventually."
+  ];
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fill = document.getElementById("fill");
+  var pct  = document.getElementById("pct");
+  var tipEl = document.getElementById("tipText");
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  if (reduce) {
+    fill.style.width = "87%";
+    pct.textContent = "87%";
+    return;
+  }
+
+  // Crawl up to 87, then stall there forever, twitching just enough to look alive.
+  var value = 0;
+  var climb = setInterval(function(){
+    value += Math.random() * 11;
+    if (value >= 87) {
+      value = 87;
+      clearInterval(climb);
+      setInterval(function(){
+        var jitter = 87 + (Math.random() < .5 ? 0 : 1);
+        fill.style.width = jitter + "%";
+        pct.textContent = jitter + "%";
+      }, 2600);
+    }
+    fill.style.width = value + "%";
+    pct.textContent = Math.floor(value) + "%";
+  }, 520);
+
+  // Rotate tips the way a loading screen does.
+  var i = 0;
+  setInterval(function(){
+    tipEl.style.opacity = 0;
+    setTimeout(function(){
+      i = (i + 1) % tips.length;
+      tipEl.textContent = tips[i];
+      tipEl.style.opacity = 1;
+    }, 400);
+  }, 5200);
+})();
+</script>
+</body>
+</html>
